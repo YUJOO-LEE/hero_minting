@@ -1,11 +1,12 @@
 import { Box, Button, ButtonGroup, Flex, Text } from '@chakra-ui/react';
 import { useWeb3React } from '@web3-react/core';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Injected } from './lib/connectors';
 import { ContractInstance } from './lib/contract';
 
 const App = () => {
   const [isMinting, setIsMinting] = useState(false);
+  const [Balance, setBalance] = useState<string>('0');
   
   const {
     library,  // web3 provider 제공
@@ -35,7 +36,6 @@ const App = () => {
 
   const handleMint = async () => {
     try{
-
       const data = await ContractInstance.populateTransaction.summon();
       setIsMinting(true);
       const signer = library.getSigner(); // 계정 잠금해제
@@ -43,14 +43,28 @@ const App = () => {
       // 잠금해제된 계정으로, 트랜잭션 구조 객체를 담아서 트랜잭션 전송
       let reciept = await signedTransaction.wait();
       console.log('reciept', reciept);
-      setIsMinting(false);
 
     } catch(error) {
-
       console.log('error!', error);
-      setIsMinting(false);
+    }
+
+    setIsMinting(false);
+    balanceOf();
+  };
+
+  const balanceOf = async () => {
+    try{
+      const data = await ContractInstance.balanceOf(account);
+      setBalance(data.toString());
+    } catch(error) {
+      console.error('error!', error);
     }
   };
+
+  useEffect(() => {
+    if (!account) return;
+    balanceOf();
+  }, [account]);
 
   return (
     <Flex w='100%' h='100vh' direction='column' justifyContent='center' alignItems='center'>
@@ -58,6 +72,7 @@ const App = () => {
         <Box mb={10}>
           <Text>Account: {account}</Text>
           <Text>chainId: {chainId}</Text>
+          <Text>balance: {Balance}</Text>
         </Box>
       }
       <ButtonGroup>
@@ -71,6 +86,7 @@ const App = () => {
         <Button
           onClick={handleMint}
           disabled={isMinting === true}
+          isLoading={isMinting}
           colorScheme='blue'
         >
           Minting
