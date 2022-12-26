@@ -5,7 +5,7 @@ import { Injected } from './lib/connectors';
 import { ContractInstance } from './lib/contract';
 
 const App = () => {
-  const [isMinting, setIsMinting] = useState(false);
+  const [isMinting, setIsMinting] = useState<boolean>(false);
   const [Balance, setBalance] = useState<string>('0');
   
   const {
@@ -18,7 +18,7 @@ const App = () => {
   } = useWeb3React();
 
   const handleConnect = () => {
-    if ((window as any).ethereum === undefined) {
+    if (!window.ethereum) {
       // 지갑 미설치 상태라면 설치 페이지 오픈
       window.open(
         `https://metamask.app.link/dapp/${window.location.host}`,
@@ -41,11 +41,11 @@ const App = () => {
       const signer = library.getSigner(); // 계정 잠금해제
       const signedTransaction = await signer.sendTransaction(data);
       // 잠금해제된 계정으로, 트랜잭션 구조 객체를 담아서 트랜잭션 전송
-      let reciept = await signedTransaction.wait();
+      const reciept: Object = await signedTransaction.wait();
       console.log('reciept', reciept);
 
-    } catch(error) {
-      console.log('error!', error);
+    } catch(error: unknown) {
+      console.error('error!', error);
     }
 
     setIsMinting(false);
@@ -54,9 +54,9 @@ const App = () => {
 
   const balanceOf = async () => {
     try{
-      const data = await ContractInstance.balanceOf(account);
+      const data: BigInt = await ContractInstance.balanceOf(account);
       setBalance(data.toString());
-    } catch(error) {
+    } catch(error: unknown) {
       console.error('error!', error);
     }
   };

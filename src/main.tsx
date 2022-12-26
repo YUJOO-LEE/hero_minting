@@ -2,10 +2,10 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { Web3ReactProvider } from '@web3-react/core';
-import { Web3Provider } from '@ethersproject/providers';
+import { ExternalProvider, JsonRpcFetchFunc, Web3Provider } from '@ethersproject/providers';
 import { ChakraProvider } from '@chakra-ui/react';
 
-const getLibrary = (provider: any) => {
+const getLibrary = (provider: ExternalProvider | JsonRpcFetchFunc) => {
   console.log('[getLibrary] provider', provider);
   return new Web3Provider(provider);
 };
